@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Agricultural RAG Knowledge Base — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem; text-align: center;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Agricultural RAG Knowledge Assistant</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 750px; margin: 0 auto;">
+      Retrieval-Augmented Generation grounded in verified extension documents from ICAR and State Agricultural Universities. Zero fabrication: questions lacking sufficient documentation are flagged transparently.
+    </p>
+  </div>
+
+  <!-- Search Interface Card -->
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <form action="{{ url_for('knowledge.index') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <input type="text" name="query" value="{{ query_text }}" class="form-control" placeholder="Search tomato blight management, fertilizer doses, irrigation schedules..." style="flex: 1; font-size: 1rem;" required>
+        
+        <select name="language" class="form-control" style="width: auto;">
+          <option value="en" {% if language == 'en' %}selected{% endif %}>English</option>
+          <option value="kn" {% if language == 'kn' %}selected{% endif %}>ಕನ್ನಡ (Kannada)</option>
+        </select>
+        
+        <button type="submit" class="btn btn-primary" style="padding: 0 1.5rem;">
+          🔍 Semantic Search
+        </button>
+      </div>
+    </form>
+
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+      <span>Indexed Vector Chunks: <strong>{{ total_chunks }}</strong></span>
+      <span>Repositories: <strong>{{ documents|length }}</strong></span>
+      <span>Grounded Citations: <strong>Active</strong></span>
+    </div>
+  </div>
+
+  <!-- Query Results Section -->
+  {% if query_result %}
+    <div class="km-card" style="margin-bottom: 2rem; border-left: 5px solid {% if query_result.status == 'success' %}var(--primary-forest){% else %}var(--warning-amber){% endif %};">
+      <div class="card-title">
+        <span>Grounded Agronomic Response</span>
+        {% if query_result.status == 'success' %}
+          <span class="status-pill status-active">Verified Source Match</span>
+        {% else %}
+          <span class="status-pill status-warning">Insufficient Evidence</span>
+        {% endif %}
+      </div>
+
+      <div style="font-size: 0.98rem; line-height: 1.6; white-space: pre-wrap; padding: 1rem; background: #f8fafc; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+        {{ query_result.answer }}
+      </div>
+
+      <!-- Citations List -->
+      {% if query_result.citations %}
+        <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.4rem;">
+            📚 Source Publications Cited:
+          </div>
+          <ul style="font-size: 0.82rem; color: var(--text-muted); padding-left: 1.25rem;">
+            {% for cite in query_result.citations %}
+              <li>{{ cite }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <!-- Retrieved Passages / Chunks -->
+      {% if query_result.retrieved_chunks %}
+        <div style="margin-top: 1.25rem;">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">
+            🔬 Exact Retrieved Vector Passages:
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            {% for chunk in query_result.retrieved_chunks %}
+              <div style="padding: 0.65rem 0.85rem; background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; color: var(--primary-forest); font-weight: 600; font-size: 0.78rem; margin-bottom: 0.25rem;">
+                  <span>{{ chunk.doc_title }} (Page {{ chunk.page_number }})</span>
+                  <span>Cosine Similarity: {{ chunk.score }}</span>
+                </div>
+                <div style="color: #334155; font-style: italic;">"{{ chunk.content }}"</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Document Catalog & Admin Ingestion Split -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Document Catalog -->
+    <div class="km-card">
+      <div class="card-title">
+        <span>Indexed Agricultural Handbooks</span>
+        <span class="status-pill status-standby">{{ documents|length }} Documents</span>
+      </div>
+
+      {% if documents %}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
+          {% for doc in documents %}
+            <div style="padding: 0.85rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: var(--primary-dark);">{{ doc.title }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Source: <strong>{{ doc.author_source }}</strong> • Type: {{ doc.doc_type }} • {{ doc.chunk_count }} Chunks
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="color: var(--text-muted); padding: 1.5rem 0;">No reference documents imported yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Admin Ingestion Form -->
+    <div class="km-card">
+      <div class="card-title">
+        <span>Admin Document Import</span>
+        {% if current_user.is_admin %}
+          <span class="status-pill status-active">Admin Only</span>
+        {% else %}
+          <span class="status-pill status-standby">Restricted</span>
+        {% endif %}
+      </div>
+
+      {% if current_user.is_admin %}
+        <form action="{{ url_for('knowledge.import_document') }}" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          
+          <div class="form-group">
+            <label class="form-label">Document Title</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g. UAS Tomato Management Bulletin" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Author / Organization</label>
+            <input type="text" name="author" class="form-control" placeholder="e.g. ICAR-IIHR / UAS Bengaluru" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Document Type</label>
+            <select name="doc_type" class="form-control">
+              <option value="Manual">Extension Manual</option>
+              <option value="Advisory">Seasonal Advisory</option>
+              <option value="Research">Research Paper</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload File (PDF, TXT, MD)</label>
+            <input type="file" name="document_file" class="form-control" accept=".pdf,.txt,.md" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            📤 Index into Vector Store
+          </button>
+        </form>
+      {% else %}
+        <div style="padding: 1.5rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+          🔒 Reference document ingestion is restricted to administrators to preserve corpus authenticity.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Dashboard — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 1250px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem;">
+    <span class="status-pill status-active">Restricted Access Control</span>
+    <h1 style="font-size: 2rem; color: var(--primary-dark); margin-top: 0.25rem;">Administrator System Dashboard</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Genuine platform diagnostics, model registries, knowledge indexing telemetry, and integration health.</p>
+  </div>
+
+  <!-- Metric Counters Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <div class="km-card" style="text-align: center;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">{{ user_count }}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Registered Farmers</div>
+    </div>
+    <div class="km-card" style="text-align: center;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">{{ plot_count }}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Cultivated Plots</div>
+    </div>
+    <div class="km-card" style="text-align: center;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">{{ analysis_count }}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Leaf Diagnoses</div>
+    </div>
+    <div class="km-card" style="text-align: center;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">{{ soil_count }}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Soil Reports</div>
+    </div>
+    <div class="km-card" style="text-align: center;">
+      <div style="font-size: 2.2rem; font-weight: 800; color: var(--info-blue);">{{ chunk_count }}</div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">RAG Vector Chunks</div>
+    </div>
+  </div>
+
+  <!-- Model Registry Table -->
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>AI / ML Model Architecture Registry</span>
+      <span class="status-pill status-active">{{ models_status|length }} Registered Architectures</span>
+    </div>
+
+    <div style="overflow-x: auto; margin-top: 1rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+        <thead>
+          <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); text-align: left;">
+            <th style="padding: 0.65rem;">Model Name & Version</th>
+            <th style="padding: 0.65rem;">Task Type</th>
+            <th style="padding: 0.65rem;">Dataset</th>
+            <th style="padding: 0.65rem;">Test Accuracy / Metric</th>
+            <th style="padding: 0.65rem;">Explainability Module</th>
+            <th style="padding: 0.65rem;">Deployment Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in models_status %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 0.65rem;">
+                <strong>{{ m.name }}</strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ m.version }}</div>
+              </td>
+              <td style="padding: 0.65rem;">{{ m.task }}</td>
+              <td style="padding: 0.65rem; font-size: 0.82rem;">{{ m.dataset }}</td>
+              <td style="padding: 0.65rem; font-weight: 700; color: var(--primary-forest);">{{ m.accuracy }}</td>
+              <td style="padding: 0.65rem; font-size: 0.8rem; color: var(--text-muted);">{{ m.explainability }}</td>
+              <td style="padding: 0.65rem;">
+                <span class="status-pill {% if m.status == 'Active' %}status-active{% else %}status-standby{% endif %}">
+                  {{ m.status }}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Integrations & Infrastructure Status -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="km-card">
+      <div class="card-title">
+        <span>External Service Health</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.88rem;">
+        {% for k, v in integrations.items() %}
+          <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+            <strong style="color: var(--primary-dark);">{{ k|replace('_', ' ')|title }}</strong>
+            <span style="color: var(--text-muted);">{{ v }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent Registered Users -->
+    <div class="km-card">
+      <div class="card-title">
+        <span>User Accounts</span>
+        <span class="status-pill status-standby">Role Protection Active</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem;">
+        {% for u in users_list %}
+          <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+            <div>
+              <strong>{{ u.username }}</strong> ({{ u.email }})
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ u.state_district }}</div>
+            </div>
+            <span class="status-pill {% if u.role == 'admin' %}status-active{% else %}status-standby{% endif %}">
+              {{ u.role }}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

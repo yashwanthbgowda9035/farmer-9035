@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer 3D Dashboard — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 2.2rem; color: var(--google-surface-tint); font-weight: 800; letter-spacing: -0.03em;">
+      Namaskara, {{ current_user.username }}! 🌾
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Region: <strong>{{ current_user.state_district }}</strong> • Language: <strong>{{ current_user.preferred_language|upper }}</strong> • Mode: <span class="status-pill status-active">3D Digital Twin Synchronized</span>
+    </p>
+  </div>
+  <div style="display: flex; gap: 0.75rem;">
+    <a href="{{ url_for('crop.detect') }}" class="btn btn-primary">📸 Scan Leaf Disease</a>
+    <a href="{{ url_for('agent.assistant') }}" class="btn btn-accent">🤖 AI Voice Agent</a>
+  </div>
+</div>
+
+<!-- Weather & Pathogen Risk Alert Banner with 3D Depth -->
+{% if weather and weather.status == 'success' %}
+  <div class="card-3d" style="margin-bottom: 2rem; border-left: 6px solid var(--google-accent);">
+    <div class="card-3d-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+      <div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">
+          Live Biometeorological Telemetry ({{ weather.provider }})
+        </div>
+        <div style="font-size: 1.8rem; font-weight: 900; color: var(--google-surface-tint); margin: 0.25rem 0;">
+          {{ weather.temperature_c }}°C • {{ weather.description }}
+        </div>
+        <div style="font-size: 0.92rem; color: var(--text-secondary);">
+          💧 Relative Humidity: <strong>{{ weather.humidity_pct }}%</strong> | 💨 Wind Speed: <strong>{{ weather.wind_speed_kmh }} km/h</strong> | 🌧️ Precipitation: <strong>{{ weather.rainfall_mm }} mm</strong>
+        </div>
+      </div>
+      
+      {% if weather_risk %}
+        <div style="background: rgba(255,255,255,0.9); padding: 0.85rem 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-align: right; box-shadow: var(--shadow-elevation-1);">
+          <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Pathogen Susceptibility Matrix</div>
+          <span class="status-pill {% if weather_risk.overall_severity == 'High' %}status-danger{% elif weather_risk.overall_severity == 'Moderate' %}status-warning{% else %}status-active{% endif %}">
+            {{ weather_risk.overall_severity }} Risk Index
+          </span>
+          <div style="font-size: 0.82rem; margin-top: 0.4rem;">
+            <a href="{{ url_for('weather.index') }}" style="color: var(--google-primary); font-weight: 700; text-decoration: none;">View Agro-Advisory ➔</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- 3D Interactive Digital Twin & Quick Stats Section -->
+<div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.75rem; margin-bottom: 2.5rem;">
+  <!-- 3D WebGL Digital Twin Plant Viewport -->
+  <div class="card-3d">
+    <div class="card-title" style="margin-bottom: 1rem;">
+      <span>🌱 3D Real-Time Crop Digital Twin</span>
+      <span class="status-pill status-active">Interactive Three.js WebGL</span>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="plant-twin-viewport" class="digital-twin-container">
+      <div class="digital-twin-overlay">
+        <span>🔄 Drag to Rotate 3D Plant</span>
+      </div>
+      <div class="digital-twin-controls">
+        <span class="status-pill status-danger" style="font-size: 0.72rem;">🔴 Red Pulse: Target Foliage</span>
+        <span class="status-pill status-active" style="font-size: 0.72rem;">🟢 Green: Active Photosynthesis</span>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted);">
+      <span>Phenological Stage: <strong>Vegetative / Canopy Branching</strong></span>
+      <span>Hardware Acceleration: <strong>60 FPS WebGL</strong></span>
+    </div>
+  </div>
+
+  <!-- Quick Metric Tiles with 3D Tilt -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+    <div class="card-3d" style="text-align: center; padding: 1.25rem;">
+      <div class="card-3d-content">
+        <div style="font-size: 2.2rem; font-weight: 900; color: var(--google-primary);">{{ plots|length }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Active Plots</div>
+        <a href="{{ url_for('monitoring.index') }}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px; margin-top: 0.5rem;">Manage</a>
+      </div>
+    </div>
+
+    <div class="card-3d" style="text-align: center; padding: 1.25rem;">
+      <div class="card-3d-content">
+        <div style="font-size: 2.2rem; font-weight: 900; color: var(--google-primary);">{{ recent_analyses|length }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Leaf Scans</div>
+        <a href="{{ url_for('main.history') }}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px; margin-top: 0.5rem;">Audit Log</a>
+      </div>
+    </div>
+
+    <div class="card-3d" style="text-align: center; padding: 1.25rem;">
+      <div class="card-3d-content">
+        <div style="font-size: 2.2rem; font-weight: 900; color: var(--google-primary);">{{ soil_tests|length }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Soil Reports</div>
+        <a href="{{ url_for('soil.index') }}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px; margin-top: 0.5rem;">Chemistry</a>
+      </div>
+    </div>
+
+    <div class="card-3d" style="text-align: center; padding: 1.25rem;">
+      <div class="card-3d-content">
+        <div style="font-size: 2.2rem; font-weight: 900; color: var(--status-warning);">{{ reminders|length }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Alerts</div>
+        <a href="{{ url_for('main.alerts') }}" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 10px; margin-top: 0.5rem;">Schedule</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Split: Recent Pathologies & Scouting Reminders -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.75rem;">
+  <!-- Recent Screenings -->
+  <div class="card-3d">
+    <div class="card-title">
+      <span>Recent Crop Pathology Screenings</span>
+      <a href="{{ url_for('crop.detect') }}" class="btn btn-outline" style="font-size: 0.78rem; padding: 4px 12px;">+ New Diagnosis</a>
+    </div>
+
+    {% if recent_analyses %}
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem;">
+        {% for a in recent_analyses %}
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.15rem; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 52px; height: 52px; background: #e2e8f0; border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ url_for('uploaded_file', filename=a.image_filename) }}" alt="leaf" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div>
+                <div style="font-weight: 800; color: var(--google-surface-tint);">{{ a.predicted_class }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ a.crop_type }} • {{ a.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+              </div>
+            </div>
+            
+            <div style="text-align: right;">
+              <span class="status-pill status-active">{{ a.confidence }}% Conf.</span>
+              <div style="margin-top: 0.35rem;">
+                <a href="{{ url_for('crop.view_result', analysis_id=a.id) }}" style="font-size: 0.8rem; color: var(--google-primary); font-weight: 700;">Heatmap Report ➔</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+        <p>No leaf analyses recorded yet.</p>
+        <a href="{{ url_for('crop.detect') }}" class="btn btn-primary" style="margin-top: 0.75rem;">Run First Screening</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Reminders -->
+  <div class="card-3d">
+    <div class="card-title">
+      <span>Field Reminders</span>
+      <a href="{{ url_for('main.alerts') }}" style="font-size: 0.8rem; color: var(--google-primary); text-decoration: none; font-weight: 700;">View All</a>
+    </div>
+
+    {% if reminders %}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.75rem;">
+        {% for r in reminders %}
+          <div style="padding: 0.85rem; background: #fefce8; border-left: 3px solid var(--status-warning); border-radius: var(--radius-sm);">
+            <div style="font-weight: 800; font-size: 0.9rem; color: #78350f;">{{ r.title }}</div>
+            <p style="font-size: 0.82rem; color: #92400e; margin: 0.25rem 0;">{{ r.message }}</p>
+            <form action="{{ url_for('main.dismiss_alert', alert_id=r.id) }}" method="POST" style="margin-top: 0.4rem;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 8px;">Dismiss ✓</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.9rem;">
+        <p>All scheduled farm tasks up to date! 🎉</p>
+        <a href="{{ url_for('main.alerts') }}" class="btn btn-outline" style="margin-top: 0.75rem; font-size: 0.8rem;">+ Add Reminder</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof initDigitalTwin === "function") {
+    initDigitalTwin("plant-twin-viewport");
+  }
+});
+</script>
+{% endblock %}

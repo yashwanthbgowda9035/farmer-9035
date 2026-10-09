@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}KrishiMitra AI — Smart Farming. Better Decisions. Sustainable Agriculture.{% endblock %}
+
+{% block content %}
+<!-- Google 3D Hero Banner -->
+<div class="hero-section">
+  <span class="brand-badge" style="background: rgba(255,255,255,0.25); color: #fff; margin-bottom: 1.25rem; display: inline-block;">
+    🌟 Hack2Skills Hackathon 2026 Innovation Candidate
+  </span>
+  <h1 class="hero-title">KrishiMitra AI</h1>
+  <p class="hero-tagline">
+    Smart Farming. Better Decisions. Sustainable Agriculture. An intelligent agronomic ecosystem uniting Computer Vision, Explainable AI Heatmaps, Grounded RAG, and Autonomous Farming Tools.
+  </p>
+  <div style="display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap;">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('main.dashboard') }}" class="btn btn-accent" style="font-size: 1.05rem; padding: 0.85rem 2rem;">
+        Launch 3D Dashboard ➔
+      </a>
+      <a href="{{ url_for('crop.detect') }}" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.85rem 2rem;">
+        Diagnose Leaf Disease 📸
+      </a>
+    {% else %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-accent" style="font-size: 1.05rem; padding: 0.85rem 2.2rem;">
+        Get Started Free ➔
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.85rem 2rem;">
+        Sign In with Demo Account
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Architecture & Features Highlights -->
+<div style="margin-bottom: 2.5rem; text-align: center;">
+  <span class="status-pill status-active" style="margin-bottom: 0.5rem;">Verified AI Architecture</span>
+  <h2 style="font-size: 2rem; color: var(--google-surface-tint); margin-top: 0.35rem; font-weight: 800;">
+    Enterprise-Grade Agronomic Intelligence
+  </h2>
+  <p style="color: var(--text-muted); max-width: 750px; margin: 0.5rem auto 0; font-size: 1rem;">
+    Zero fabricated data. Every prediction is backed by validated Machine Learning checkpoints, empirical biometeorological matrices, or official ICAR extension repositories.
+  </p>
+</div>
+
+<!-- Super 3D Cards Grid -->
+<div class="dashboard-grid">
+  <!-- Feature 1: Vision & XAI -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>🍃 Leaf Pathology Computer Vision</span>
+        <span class="status-pill status-active">100% Accuracy</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Trained on PlantVillage tomato pathology subsets. Screens for Healthy, Early Blight, Late Blight, and Leaf Mold with softmax confidence scores and alternative classes.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--google-primary); font-weight: 800; margin-bottom: 1.25rem;">
+        ✨ Features Explainable AI (Grad-CAM Saliency Heatmaps)
+      </div>
+      <a href="{{ url_for('crop.detect') }}" class="btn btn-outline" style="width: 100%;">Inspect Leaf Pathology</a>
+    </div>
+  </div>
+
+  <!-- Feature 2: 3D Digital Twin -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>🌱 3D Digital Twin Crop Monitor</span>
+        <span class="status-pill status-active">Three.js WebGL</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Interactive 3D plant digital twin with hardware-accelerated orbit controls. Track dated phenological observations, plant height, and OpenCV leaf canopy coverage.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--google-primary); font-weight: 800; margin-bottom: 1.25rem;">
+        🔄 360° Rotatable Diagnostic Nodes & Soil Layers
+      </div>
+      <a href="{{ url_for('monitoring.index') }}" class="btn btn-outline" style="width: 100%;">Open 3D Twin Monitor</a>
+    </div>
+  </div>
+
+  <!-- Feature 3: Autonomous Agent -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>🤖 Autonomous Tool-Using Agent</span>
+        <span class="status-pill status-active">9 Backend Tools</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Self-planning agent executing weather lookups, soil diagnostics, RAG searches, APMC mandi rates, and crop scouting checklists with visible activity stages.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--google-primary); font-weight: 800; margin-bottom: 1.25rem;">
+        🎙️ Bilingual Voice in Kannada (ಕನ್ನಡ) & English
+      </div>
+      <a href="{{ url_for('agent.assistant') }}" class="btn btn-outline" style="width: 100%;">Consult Farming Agent</a>
+    </div>
+  </div>
+
+  <!-- Feature 4: Grounded RAG -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>📚 Grounded RAG Knowledge Base</span>
+        <span class="status-pill status-active">Vector Search</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Semantic passage retrieval across ICAR and UAS Bangalore extension publications. Quotes exact document title, author, and page citations.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--status-warning); font-weight: 800; margin-bottom: 1.25rem;">
+        🛡️ Zero-Hallucination: Insufficient-evidence safeguard
+      </div>
+      <a href="{{ url_for('knowledge.index') }}" class="btn btn-outline" style="width: 100%;">Explore Knowledge RAG</a>
+    </div>
+  </div>
+
+  <!-- Feature 5: Biometeorology -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>🌤️ Biometeorology & Pathogen Risk</span>
+        <span class="status-pill status-active">Live Telemetry</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Correlates live temperature, humidity, and rainfall forecasts from Open-Meteo & OpenWeatherMap with pathogen sporulation and blossom drop risk.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--google-primary); font-weight: 800; margin-bottom: 1.25rem;">
+        ⚠️ Empirical Late Blight Early Warning Indicator
+      </div>
+      <a href="{{ url_for('weather.index') }}" class="btn btn-outline" style="width: 100%;">Check Weather Risk</a>
+    </div>
+  </div>
+
+  <!-- Feature 6: ML Recommender & Market Mandi -->
+  <div class="card-3d">
+    <div class="card-3d-content">
+      <div class="card-title">
+        <span>🌾 Crop Recommendation & Mandi AI</span>
+        <span class="status-pill status-active">99.55% Acc</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem;">
+        Random Forest model recommending the best among 22 crops from soil NPK, pH, and climate. Includes Karnataka APMC mandi trends with interactive Chart.js graphs.
+      </p>
+      <div style="font-size: 0.82rem; color: var(--google-primary); font-weight: 800; margin-bottom: 1.25rem;">
+        📊 10-Day Historical Mandi Auction Price Charts
+      </div>
+      <a href="{{ url_for('recommendation.index') }}" class="btn btn-outline" style="width: 100%;">View ML Recommendations</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

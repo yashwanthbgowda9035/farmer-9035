@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Pest Identification — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Agricultural Pest Vision Module</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 750px; margin: 0 auto;">
+      A dedicated computer-vision architecture for insect and arthropod pests. Separate from leaf pathology to ensure zero diagnostic cross-contamination.
+    </p>
+  </div>
+
+  <!-- Status / Standby Notice -->
+  <div class="alert alert-warning">
+    <strong>🛡️ Architectural Integrity Notice:</strong>
+    The dedicated pest vision model checkpoint (<code>pest_model.pkl</code>) is currently in standby. KrishiMitra AI strictly prohibits reusing the tomato leaf disease model for insect identification to avoid misleading biological diagnoses.
+  </div>
+
+  <!-- Upload Form -->
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>Upload Insect / Pest Photograph</span>
+      <span class="status-pill status-standby">Standby Registry Mode</span>
+    </div>
+
+    <form action="{{ url_for('crop.pests') }}" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="dropzone-box" onclick="document.getElementById('pest_file_input').click();">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🐛</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary-dark);">Select an insect photograph to inspect</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem;">Supported formats: PNG, JPG, JPEG, WEBP</p>
+        <input type="file" name="pest_image" id="pest_file_input" style="display: none;" accept="image/*" required>
+      </div>
+
+      <div style="text-align: center; margin-top: 1.25rem;">
+        <button type="submit" class="btn btn-secondary">
+          🔍 Inspect Pest Photograph
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Inspection Result if returned -->
+  {% if pest_result %}
+    <div class="km-card" style="margin-bottom: 2rem; border-left: 5px solid var(--warning-amber);">
+      <div class="card-title">
+        <span>Inference Status</span>
+        <span class="status-pill status-standby">{{ pest_result.status }}</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">{{ pest_result.error }}</p>
+      {% if pest_result.instructions %}
+        <div style="margin-top: 0.75rem; font-size: 0.85rem; background: #f8fafc; padding: 0.75rem; border-radius: var(--radius-sm);">
+          <strong>Training Workflow:</strong> {{ pest_result.instructions }}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Supported Pest Species Registry -->
+  <div class="km-card">
+    <div class="card-title">
+      <span>Supported Pest Species Registry</span>
+      <span class="status-pill status-active">{{ supported_species|length }} Taxa Configured</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+      {% for sp in supported_species %}
+        <div style="padding: 0.85rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+          <div>
+            <strong style="color: var(--primary-dark); font-size: 0.95rem;">{{ sp.name }}</strong>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Target Host Crops: {{ sp.target_crops }}</div>
+          </div>
+          <span class="status-pill status-standby">Registry Ready</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

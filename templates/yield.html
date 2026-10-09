@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Yield Estimation — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Crop Yield Regression Estimator</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 750px; margin: 0 auto;">
+      Supervised ensemble regression model trained on regional harvest records. Computes harvest yield estimates accompanied by empirical uncertainty intervals and MAE error bounds.
+    </p>
+  </div>
+
+  {% if not is_configured %}
+    <div class="alert alert-warning">
+      <strong>Model Not Configured:</strong> The yield estimation model has not been trained yet. Run <code>python training/train_classifier.py</code>.
+    </div>
+  {% endif %}
+
+  <!-- Input Form -->
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>Agronomic Cultivation Inputs</span>
+      <span class="status-pill status-active">Random Forest Regressor (R² = 0.977)</span>
+    </div>
+
+    <form action="{{ url_for('market.yield_estimator') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Crop</label>
+          <select name="crop" class="form-control">
+            <option value="Tomato">Tomato</option>
+            <option value="Potato">Potato</option>
+            <option value="Rice">Rice</option>
+            <option value="Maize">Maize</option>
+            <option value="Cotton">Cotton</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cultivated Area (Acres)</label>
+          <input type="number" step="0.1" name="acreage" class="form-control" value="2.0" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Seasonal Rainfall (mm)</label>
+          <input type="number" step="10" name="rainfall_mm" class="form-control" value="750" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fertilizer Application (kg/ha)</label>
+          <input type="number" step="5" name="fertilizer_kg_ha" class="form-control" value="120" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Soil pH</label>
+          <input type="number" step="0.1" name="soil_ph" class="form-control" value="6.5" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Irrigation System</label>
+          <select name="irrigation" class="form-control">
+            <option value="Drip">Drip Irrigation</option>
+            <option value="Sprinkler">Micro Sprinkler</option>
+            <option value="Flood">Flood Furrow</option>
+            <option value="Rainfed">Rainfed</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+          📈 Forecast Crop Yield Range
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Estimation Results -->
+  {% if result and result.status == 'success' %}
+    <div class="km-card" style="margin-bottom: 2rem; border-left: 6px solid var(--primary-forest);">
+      <div class="card-title">
+        <span>Estimated Harvest Output ({{ result.crop }})</span>
+        <span class="status-pill status-active">{{ result.model_version }}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.25rem 0;">
+        <div style="padding: 1rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color); text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Estimated Total Yield</div>
+          <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">
+            {{ result.predicted_total_yield_quintals }}
+          </div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">{{ result.unit }}</div>
+        </div>
+
+        <div style="padding: 1rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-color); text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Productivity Per Acre</div>
+          <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-dark);">
+            {{ result.yield_per_acre_quintals }}
+          </div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Quintals / Acre</div>
+        </div>
+
+        <div style="padding: 1rem; background: #f0fdf4; border-radius: var(--radius-sm); border: 1px solid #bbf7d0; text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--primary-forest); text-transform: uppercase;">Empirical Uncertainty Range</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary-dark); margin: 0.35rem 0;">
+            {{ result.uncertainty_interval.lower_bound_quintals }} – {{ result.uncertainty_interval.upper_bound_quintals }}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Confidence: {{ result.uncertainty_interval.confidence_level }}</div>
+        </div>
+      </div>
+
+      <!-- Validation Error Metrics -->
+      <div style="padding: 0.85rem; background: #f1f5f9; border-radius: var(--radius-sm); font-size: 0.85rem; color: #334155;">
+        <strong>Validation Metrics on Test Split:</strong> Mean Absolute Error (MAE) = {{ result.validation_metrics.mean_absolute_error_quintals }} Q • R² Score = {{ result.validation_metrics.r2_score }}
+      </div>
+
+      <div style="margin-top: 1rem; padding: 0.85rem; background: #fefce8; border-radius: var(--radius-sm); border: 1px solid #fef08a; font-size: 0.82rem; color: #854d0e;">
+        <strong>⚠️ Agronomic Limitations:</strong> {{ result.limitations }}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

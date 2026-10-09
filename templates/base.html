@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KrishiMitra AI: Smart Farming Platform integrating Computer Vision, Grounded RAG, and Autonomous Agronomic Tools.">
+  <title>{% block title %}KrishiMitra AI — Intelligent Farming Companion{% endblock %}</title>
+  
+  <!-- Master Google Material 3 & 3D Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <!-- Chart.js for Agronomic Telemetry -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Three.js for Hardware-Accelerated 3D Digital Twin Visualizations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- Accessibility Skip Link (WCAG 2.1 AA) -->
+  <a href="#main-content" class="skip-to-content">Skip to primary content</a>
+
+  <!-- Offline status indicator banner -->
+  <div id="offline-indicator" role="status" aria-live="polite">
+    ⚠️ Offline Mode: Working with cached application data. Real-time meteorological telemetry and remote AI features will resume when online.
+  </div>
+
+  <!-- Header with Google Material 3 Glassmorphism -->
+  <header class="km-header" role="banner">
+    <div class="nav-container">
+      <a href="{{ url_for('main.index') }}" class="brand-logo" aria-label="KrishiMitra AI Homepage">
+        <span>🌱 KrishiMitra AI</span>
+        <span class="brand-badge">Google 3D Edition</span>
+      </a>
+
+      <nav class="main-nav" role="navigation" aria-label="Main Platform Navigation">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('main.dashboard') }}" class="nav-link">Dashboard</a>
+          <a href="{{ url_for('crop.detect') }}" class="nav-link">Disease Vision</a>
+          <a href="{{ url_for('agent.assistant') }}" class="nav-link">AI Agent</a>
+          <a href="{{ url_for('knowledge.index') }}" class="nav-link">Knowledge RAG</a>
+          <a href="{{ url_for('weather.index') }}" class="nav-link">Weather & Risk</a>
+          <a href="{{ url_for('recommendation.index') }}" class="nav-link">Crop Recommend</a>
+          <a href="{{ url_for('soil.index') }}" class="nav-link">Soil Health</a>
+          <a href="{{ url_for('irrigation.index') }}" class="nav-link">Irrigation</a>
+          <a href="{{ url_for('crop.pests') }}" class="nav-link">Pest ID</a>
+          <a href="{{ url_for('monitoring.index') }}" class="nav-link">3D Twin Monitor</a>
+          <a href="{{ url_for('market.yield_estimator') }}" class="nav-link">Yield Est.</a>
+          <a href="{{ url_for('market.index') }}" class="nav-link">Market Mandi</a>
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.index') }}" class="nav-link" style="color: #fef08a; font-weight: 800;">Admin Panel</a>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
+          <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+          <a href="{{ url_for('auth.register') }}" class="nav-link btn btn-accent" style="padding: 0.4rem 1rem;">Get Started</a>
+        {% endif %}
+      </nav>
+
+      <div class="nav-user-actions">
+        <!-- Accessibility Contrast Mode Toggle Button -->
+        <button id="contrast-toggle-btn" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" title="Toggle High Contrast / Dark Theme" aria-pressed="false">
+          🌓 Contrast
+        </button>
+
+        {% if current_user.is_authenticated %}
+          <div class="user-badge" aria-label="Logged in user profile">
+            <span>👤 <strong>{{ current_user.username }}</strong></span>
+            <span style="font-size: 0.75rem; opacity: 0.85;">({{ current_user.role|capitalize }})</span>
+          </div>
+          <a href="{{ url_for('main.settings') }}" class="nav-link" title="Settings" aria-label="User Settings">⚙️</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">Logout</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content with Landmark Role -->
+  <main id="main-content" class="km-main" role="main" aria-label="Primary Agronomic Workspace">
+    <!-- Flash Messages with Live Region -->
+    <div class="flash-container" role="region" aria-live="polite">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <span>{{ message }}</span>
+              <button onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; line-height: 1;" aria-label="Close notification">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
+      {% if error_message %}
+        <div class="alert alert-danger">
+          <span>{{ error_message }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="km-footer" role="contentinfo">
+    <p><strong>KrishiMitra AI — Your Intelligent Farming Companion</strong> | Smart Farming. Better Decisions. Sustainable Agriculture.</p>
+    <p style="margin-top: 0.5rem; opacity: 0.85;">Built for Hack2Skills 2026 | Computer Vision • Multi-Crop • Explainable AI • Grounded RAG • 3D Digital Twin</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/tilt-3d.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/three-plant.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

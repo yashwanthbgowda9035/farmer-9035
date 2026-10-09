@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts & Reminders — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Field Alerts & Farming Reminders</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Scheduled reminders for scouting, irrigation checks, and biometeorological risk warnings.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+    <!-- Add Reminder Form -->
+    <div class="km-card">
+      <div class="card-title">
+        <span>+ Schedule Reminder</span>
+      </div>
+
+      <form action="{{ url_for('main.alerts') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Reminder Title</label>
+          <input type="text" name="title" class="form-control" placeholder="e.g. Inspect tomato lower leaves" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            <option value="Observation">Crop Scouting / Observation</option>
+            <option value="Irrigation">Irrigation Cycle Review</option>
+            <option value="Fertigation">Nutrient / Fertigation</option>
+            <option value="Weather">Weather-Trigger Follow-Up</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Reminder Notes / Action</label>
+          <textarea name="message" class="form-control" rows="3" placeholder="e.g. Check leaf undersides for white mold or water-soaked spots." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          📅 Save Reminder
+        </button>
+      </form>
+    </div>
+
+    <!-- Active & Past Alerts List -->
+    <div class="km-card">
+      <div class="card-title">
+        <span>Your Reminder Schedule</span>
+        <span class="status-pill status-active">{{ alerts|length }} Logged</span>
+      </div>
+
+      {% if alerts %}
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1rem;">
+          {% for a in alerts %}
+            <div style="padding: 1rem; background: {% if a.is_read %}#f8fafc{% else %}#fefce8{% endif %}; border-radius: var(--radius-sm); border-left: 4px solid {% if a.is_read %}#94a3b8{% else %}var(--warning-amber){% endif %};">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <span class="status-pill {% if a.is_read %}status-standby{% else %}status-warning{% endif %}" style="font-size: 0.75rem;">
+                    {{ a.category }}
+                  </span>
+                  <div style="font-weight: 700; color: var(--primary-dark); font-size: 1rem; margin-top: 0.35rem;">
+                    {{ a.title }}
+                  </div>
+                </div>
+
+                {% if not a.is_read %}
+                  <form action="{{ url_for('main.dismiss_alert', alert_id=a.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 8px;">Mark Done ✓</button>
+                  </form>
+                {% else %}
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Completed</span>
+                {% endif %}
+              </div>
+
+              <p style="font-size: 0.88rem; color: #334155; margin: 0.4rem 0;">{{ a.message }}</p>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Logged on {{ a.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+          <p>No alerts or reminders scheduled yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

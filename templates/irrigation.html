@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Irrigation Advisor — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Smart Irrigation Guidance Service</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 750px; margin: 0 auto;">
+      FAO-56 Evapotranspiration and root-zone water depletion guidance. Transparently distinguishes manual soil observation from capacitive hardware sensor telemetry.
+    </p>
+  </div>
+
+  <!-- Irrigation Input Form -->
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>Field Hydrological Parameters</span>
+      <a href="{{ url_for('irrigation.fertilizer') }}" class="btn btn-outline" style="font-size: 0.8rem; padding: 4px 10px;">🍃 Fertilizer Guidance ➔</a>
+    </div>
+
+    <form action="{{ url_for('irrigation.index') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Crop Type</label>
+          <select name="crop_type" class="form-control">
+            <option value="Tomato">Tomato</option>
+            <option value="Potato">Potato</option>
+            <option value="Maize">Maize</option>
+            <option value="Rice">Rice</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Crop Growth Stage</label>
+          <select name="growth_stage" class="form-control">
+            <option value="Seedling">Seedling</option>
+            <option value="Vegetative" selected>Vegetative</option>
+            <option value="Flowering">Flowering</option>
+            <option value="Fruiting">Fruiting</option>
+            <option value="Harvesting">Harvesting</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Soil Texture Type</label>
+          <select name="soil_type" class="form-control">
+            <option value="Red Loam">Red Loam</option>
+            <option value="Black Cotton">Black Cotton</option>
+            <option value="Clay Loam">Clay Loam</option>
+            <option value="Sandy">Sandy</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Moisture Telemetry Mode</label>
+          <select name="moisture_input_mode" class="form-control" id="mode-select" onchange="toggleSensorNote(this.value)">
+            <option value="manual" selected>Manual Mode (Field observation / feel test)</option>
+            <option value="sensor">Hardware Sensor Mode (Capacitive telemetry)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Soil Moisture Estimate (%)</label>
+          <input type="number" step="1" name="soil_moisture_pct" class="form-control" value="45" min="0" max="100" required>
+        </div>
+      </div>
+
+      <div id="sensor-note" style="display: none; padding: 0.6rem; background: #e0f2fe; color: #0369a1; border-radius: var(--radius-sm); font-size: 0.82rem; margin-bottom: 1rem;">
+        📡 Hardware Sensor Mode enabled: Ensure your field capacitive probe (e.g. RS485 / Modbus) is calibrated.
+      </div>
+
+      <div style="text-align: center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+          💧 Calculate Irrigation Requirement
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Guidance Results -->
+  {% if guidance and guidance.status == 'success' %}
+    <div class="km-card" style="margin-bottom: 2rem; border-left: 6px solid var(--info-blue);">
+      <div class="card-title">
+        <span>Irrigation Advisory: {{ guidance.advisory_status }}</span>
+        <span class="status-pill status-active">{{ guidance.input_mode }}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+        <div style="padding: 0.85rem; background: #f8fafc; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Water Recommended</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: var(--info-blue);">
+            {{ guidance.water_liters_per_sqm }} <span style="font-size: 0.85rem;">Litres / m²</span>
+          </div>
+        </div>
+
+        <div style="padding: 0.85rem; background: #f8fafc; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Daily Crop Water Need</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-dark);">
+            {{ guidance.daily_crop_water_need_mm }} <span style="font-size: 0.85rem;">mm/day (ETc)</span>
+          </div>
+        </div>
+
+        <div style="padding: 0.85rem; background: #f8fafc; border-radius: var(--radius-sm);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Crop Coefficient (Kc)</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-forest);">
+            {{ guidance.crop_coefficient_kc }}
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 1rem; background: #f0fdf4; border-radius: var(--radius-sm); border: 1px solid #bbf7d0; margin-top: 1rem;">
+        <strong>Agronomic Rationale:</strong> {{ guidance.rationale }}
+        <div style="margin-top: 0.5rem; font-weight: 600; color: var(--primary-forest);">
+          Action: {{ guidance.action_instructions }}
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+        Formulation: <em>{{ guidance.methodology }}</em>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleSensorNote(val) {
+  const note = document.getElementById("sensor-note");
+  if (note) note.style.display = val === "sensor" ? "block" : "none";
+}
+</script>
+{% endblock %}

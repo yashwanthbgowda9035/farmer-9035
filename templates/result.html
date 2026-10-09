@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnosis Result — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.8rem; color: var(--primary-dark);">Diagnostic Pathology Report</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Analysis Record #{{ analysis_id or 'Screening' }} • Crop: Tomato (Solanum lycopersicum)</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{{ url_for('crop.detect') }}" class="btn btn-secondary">📸 Scan Another Leaf</a>
+      <a href="{{ url_for('agent.assistant') }}" class="btn btn-accent">🤖 Discuss with Agent</a>
+    </div>
+  </div>
+
+  {% if result.status == 'not_configured' %}
+    <div class="alert alert-warning">
+      <strong>⚠️ Model Not Configured:</strong> {{ result.error }}
+      <p style="margin-top: 0.5rem; font-size: 0.9rem;">To train and register this model, run <code>python training/train_classifier.py</code> in your project terminal.</p>
+    </div>
+  {% else %}
+    <!-- Primary Prediction Banner -->
+    <div class="km-card" style="margin-bottom: 1.5rem; border-left: 6px solid var(--primary-green); background: #fbfdfb;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="status-pill status-active" style="font-size: 0.8rem;">Computer-Vision Inference Result</span>
+          <h2 style="font-size: 1.85rem; color: var(--primary-dark); margin: 0.4rem 0;">
+            {{ result.predicted_class }}
+          </h2>
+          <div style="font-size: 0.95rem; color: var(--text-muted);">
+            Architecture: <strong>{{ result.model_version }}</strong> | Crop Target: <strong>Tomato</strong>
+          </div>
+        </div>
+
+        <div style="background: #fff; padding: 1rem 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center; min-width: 170px;">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">MODEL CONFIDENCE</div>
+          <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary-forest);">{{ result.confidence }}%</div>
+          <div style="width: 100%; background: #e2e8f0; height: 8px; border-radius: 999px; overflow: hidden; margin-top: 0.35rem;">
+            <div style="width: {{ result.confidence }}%; background: var(--accent-leaf); height: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preliminary Assessment Notice -->
+      <div style="margin-top: 1rem; padding: 0.65rem 1rem; background: #fefce8; border-radius: var(--radius-sm); border: 1px solid #fef08a; font-size: 0.85rem; color: #854d0e;">
+        <strong>⚠️ Preliminary Decision Support Statement:</strong> {{ result.uncertainty_note or 'This prediction is a computer-vision screening. Field variations, camera lighting, and co-infections may influence leaf appearance. Physical verification by an agricultural extension officer or Krishi Vigyan Kendra (KVK) is recommended before initiating chemical treatments.' }}
+      </div>
+    </div>
+
+    <!-- Dual Image View: Original vs Explainable AI Heatmap -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div class="km-card" style="text-align: center;">
+        <div style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.75rem;">Uploaded Leaf Photograph</div>
+        <div style="width: 100%; height: 320px; background: #f1f5f9; border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <img src="{{ url_for('uploaded_file', filename=image_filename) }}" alt="Original Leaf" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Normalized resolution: 224x224 RGB</div>
+      </div>
+
+      <div class="km-card" style="text-align: center;">
+        <div style="font-weight: 700; color: var(--primary-dark); margin-bottom: 0.75rem;">Explainable AI: Feature Saliency Heatmap</div>
+        <div style="width: 100%; height: 320px; background: #f1f5f9; border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          {% if result.heatmap_url %}
+            <img src="{{ url_for('static', filename=result.heatmap_url) }}" alt="Grad-CAM Saliency Heatmap" style="width: 100%; height: 100%; object-fit: contain;">
+          {% else %}
+            <div style="color: var(--text-muted); padding: 1rem;">Heatmap generation module in standby.</div>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.3;">
+          🔴 Red/Yellow zones highlight visual anomaly clusters (lesion edges, chlorosis) influencing the model.
+          <br><em>Heatmap displays regions influencing model activation and does not prove that a disease exists.</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alternative Predictions Table -->
+    {% if result.alternatives %}
+      <div class="km-card" style="margin-bottom: 1.5rem;">
+        <div class="card-title">
+          <span>Alternative Class Probabilities</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Multi-class softmax distribution</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+          {% for alt in result.alternatives %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: var(--radius-sm);">
+              <span style="font-size: 0.9rem; font-weight: 600;">{{ alt.class }}</span>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 140px; background: #e2e8f0; height: 6px; border-radius: 999px; overflow: hidden;">
+                  <div style="width: {{ alt.confidence }}%; background: #94a3b8; height: 100%;"></div>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); min-width: 45px; text-align: right;">{{ alt.confidence }}%</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Agronomic Recommendations & Citations -->
+    <div class="km-card" style="margin-bottom: 1.5rem;">
+      <div class="card-title">
+        <span>Recommended Agronomic Interventions</span>
+        <span class="status-pill status-active">Extension Guidelines</span>
+      </div>
+      <div style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); white-space: pre-line; background: #f0fdf4; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid #bbf7d0;">
+        {{ result.recommendations }}
+      </div>
+
+      {% if result.citations %}
+        <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-muted);">
+          <strong>📚 Trusted Scientific Reference:</strong> {{ result.citations }}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+INDIAN COUNCIL OF AGRICULTURAL RESEARCH (ICAR) & UAS BENGALURU
+PACKAGE OF PRACTICES: TOMATO CULTIVATION & DISEASE MANAGEMENT (SOLANUM LYCOPERSICUM)
+
+1. INTRODUCTION & CLIMATIC REQUIREMENTS
+Tomato is one of the most widely cultivated solanaceous vegetables in Karnataka and peninsular India. The crop grows best in well-drained red loamy soils with a pH between 6.0 and 7.2. Ideal temperatures range from 20°C to 28°C. Temperatures exceeding 35°C lead to flower drop and poor fruit set.
+
+2. MAJOR DISEASES & INTEGRATED DISEASE MANAGEMENT (IDM)
+
+2.1 EARLY BLIGHT (Alternaria solani)
+Symptoms: Concentric dark brown to black rings (target-board effect) primarily on older foliage. Leaves develop chlorotic yellow halos around lesions, leading to defoliation.
+Management:
+- Maintain crop rotation with non-solanaceous crops for at least 2 seasons.
+- Ensure wide plant spacing (60 cm x 45 cm) and staking with bamboo stakes or trellis wires to prevent canopy contact with soil.
+- Preventive spray: Copper oxychloride @ 3.0 g/litre or Mancozeb 75 WP @ 2.0 g/litre at 10-14 day intervals upon first appearance of leaf spots.
+- Drip irrigation is strongly advised to prevent wetting leaf foliage.
+
+2.2 LATE BLIGHT (Phytophthora infestans)
+Symptoms: Rapidly enlarging water-soaked irregular lesions on leaves and stems, turning purplish-brown to black. Under humid conditions (>85% RH) and cool temperatures (15-22°C), white downy fungal growth appears on the undersides of leaves.
+Management:
+- Severe oomycete pathogen capable of destroying entire fields within 7-10 days if unchecked.
+- Destroy and incinerate infected foliage immediately upon detection.
+- Fungicidal intervention: Prophylactic sprays of Mancozeb (2 g/L). If late blight symptoms appear, apply systemic combinations such as Metalaxyl + Mancozeb (Ridomil MZ @ 2.5 g/litre) or Cymoxanil + Mancozeb (Sectotin @ 2.0 g/litre).
+- Never allow stagnant standing water in the field; provide furrow drainage channels.
+
+2.3 LEAF MOLD (Passalora fulva / Cladosporium fulvum)
+Symptoms: Pale greenish-yellow spots on the upper leaf surface with olive-brown velvety fungal mold on the lower surface. Thrives in high relative humidity (>85%) in polyhouses and dense plantings.
+Management:
+- Increase greenhouse or canopy ventilation and prune basal sucker shoots to reduce ambient humidity below 80%.
+- Apply bio-agent Trichoderma viride @ 5 g/litre or copper fungicides if threshold damage exceeds 5% foliage.
+
+3. SOIL NUTRIENT MANAGEMENT (NPK FERTILIZER RECOMMENDATIONS)
+For irrigated hybrid tomatoes in Karnataka:
+- Farmyard Manure (FYM): 25 tonnes/hectare incorporated during final land preparation.
+- Recommended Fertilizer Dose: 180 kg Nitrogen (N), 120 kg Phosphorus (P2O5), and 150 kg Potassium (K2O) per hectare.
+- Basal Application: 50% N, 100% P, and 50% K applied at transplanting.
+- Top Dressing / Fertigation: Remaining 50% N and 50% K applied in 3 equal split doses at 30, 45, and 60 days after transplanting.
+- Foliar Spray: Spray 0.2% Borax and 0.5% Calcium Nitrate at early flowering to prevent Blossom End Rot (BER).
+
+4. WATER & IRRIGATION REGIME
+- Water requirement is 400 to 600 mm throughout the 110-120 day crop cycle.
+- Drip irrigation saves 40-45% water compared to flood furrow irrigation and reduces leaf wetness hours.
+- Peak water requirement occurs during fruit enlargement stage (crop coefficient Kc = 1.05 to 1.15).

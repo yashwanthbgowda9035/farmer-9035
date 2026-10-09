@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Google-Grade AI Farming Agent & Voice Assistant — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 1.75rem; max-width: 1400px; margin: 0 auto;">
+  <!-- Left: Interactive Google Material 3 Chat Experience -->
+  <div>
+    <div style="margin-bottom: 1.25rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <span class="status-pill status-active">Autonomous Agent</span>
+        <span class="status-pill status-standby">Bilingual Kannada & English</span>
+      </div>
+      <h1 style="font-size: 2.2rem; color: var(--google-surface-tint); font-weight: 900; letter-spacing: -0.03em;">
+        AI Farming Agent & Voice Companion
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Speaks fluent English and Kannada. Plans agronomic tasks, triggers verified backend tools, and synthesizes grounded evidence without hallucinations.
+      </p>
+    </div>
+
+    <!-- Agent Activity Stages Panel (Dynamic) -->
+    <div id="agent-activity-panel" class="agent-stages-panel" style="display: none;" role="region" aria-live="polite"></div>
+
+    <!-- Chat Box with 3D Border & Elevation -->
+    <div class="chat-window card-3d" style="height: 560px; padding: 0;">
+      <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
+        <!-- Welcome Prompt -->
+        <div class="chat-bubble agent">
+          <strong>🌱 KrishiMitra Voice Companion:</strong>
+          <p style="margin-top: 0.4rem;">
+            Namaskara! I am your AI farming assistant. You can speak into your microphone or type questions like:
+          </p>
+          <ul style="margin: 0.5rem 0 0 1.25rem; font-size: 0.9rem; line-height: 1.6;">
+            <li>"What is the current weather and rainfall forecast?"</li>
+            <li>"What is the wholesale mandi price of Tomato today?"</li>
+            <li>"Give me a scouting checklist for tomato at vegetative stage."</li>
+            <li>"ಟೊಮ್ಯಾಟೊ ಎಲೆ ಕಪ್ಪು ಕಲೆ ರೋಗಕ್ಕೆ ಯಾವ ಔಷಧ ಸಿಂಪಡಿಸಬೇಕು?"</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Microphone & Speech Status Bar with Animated Audio Waves -->
+      <div id="mic-status-bar" style="padding: 0.35rem 1.25rem; font-size: 0.8rem; color: var(--text-muted); background: #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+        <span id="mic-status">Ready. Click Speak to dictate in Kannada or English.</span>
+        
+        <!-- Live Voice Waveform Visualizer -->
+        <div id="voice-waves" class="voice-waves-container" style="display: none;" aria-hidden="true">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <form id="agent-chat-form" class="chat-input-bar">
+        <!-- Language selector -->
+        <select id="agent-lang-select" class="form-control" style="width: auto; padding: 0.5rem 0.75rem; font-size: 0.85rem;" title="Select Language" aria-label="Select Voice Language">
+          {% for lang in languages %}
+            <option value="{{ lang.code }}" {% if current_user.preferred_language == lang.code %}selected{% endif %}>
+              {{ lang.flag }} {{ lang.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <!-- Microphone Button -->
+        <button type="button" id="mic-btn" class="btn btn-secondary" title="Click to speak (Web Speech API)" style="padding: 0.55rem 1rem;" aria-label="Start Voice Dictation">
+          🎤 Speak
+        </button>
+
+        <!-- Query text input -->
+        <input type="text" id="agent-query-input" class="form-control" placeholder="Ask about weather, disease, mandi prices, or farming plans..." required autocomplete="off" aria-label="Ask your agriculture question">
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary" style="padding: 0.55rem 1.4rem;">
+          Send ➔
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Column: Approved Agent Tools & Safety Guardrails -->
+  <div>
+    <div class="card-3d" style="margin-bottom: 1.5rem;">
+      <div class="card-title" style="font-size: 1.05rem;">
+        <span>Registered Autonomous Tools</span>
+        <span class="status-pill status-active">9 Tools</span>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Strictly typed and permission-validated backend interfaces:</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto;">
+        {% for name, t in tools.items() %}
+          <div style="padding: 0.6rem 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-size: 0.82rem;">
+            <div style="font-weight: 800; color: var(--google-primary);"><code>{{ t.name }}</code></div>
+            <div style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 2px;">{{ t.description }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card-3d">
+      <div class="card-title" style="font-size: 1rem;">
+        <span>🛡️ Responsible AI Guardrails</span>
+      </div>
+      <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 1.25rem; line-height: 1.6;">
+        <li><strong>Zero Shell Access:</strong> LLM cannot execute arbitrary code or bash commands.</li>
+        <li><strong>Role Segregation:</strong> Strict user data ownership enforcement.</li>
+        <li><strong>Grounding:</strong> Only verified ICAR citations displayed.</li>
+        <li><strong>Rate Limiting:</strong> In-memory sliding window protection against DDoS.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+<script>
+// Hook animated waves to microphone state
+const micBtn = document.getElementById("mic-btn");
+const voiceWaves = document.getElementById("voice-waves");
+if (micBtn && voiceWaves) {
+  const origClick = micBtn.onclick;
+  micBtn.addEventListener("click", () => {
+    setTimeout(() => {
+      const isListening = micBtn.style.background.includes("rgb(220, 38, 38)") || micBtn.style.background === "#dc2626";
+      voiceWaves.style.display = isListening ? "flex" : "none";
+    }, 100);
+  });
+}
+</script>
+{% endblock %}

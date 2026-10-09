@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 3rem auto;">
+  <div class="km-card">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <h1 style="font-size: 1.8rem; color: var(--primary-dark);">Sign In to KrishiMitra</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Your Intelligent Farming Companion</p>
+    </div>
+
+    <!-- Hackathon Demo Credentials Box -->
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.82rem;">
+      <strong style="color: var(--primary-forest);">💡 Hackathon Demo Logins:</strong>
+      <div style="margin-top: 0.25rem;">
+        • <strong>Farmer:</strong> <code>farmer_ramesh</code> | Password: <code>Farmer@123</code>
+        <br>• <strong>Admin:</strong> <code>admin</code> | Password: <code>Admin@KrishiMitra2026</code>
+      </div>
+    </div>
+
+    <form action="{{ url_for('auth.login') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label">Username or Email</label>
+        <input type="text" name="username" class="form-control" placeholder="Enter username or email" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; margin-top: 0.5rem;">
+        Sign In ➔
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
+      Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: var(--primary-forest); font-weight: 600;">Register here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

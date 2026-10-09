@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Disease Detection — KrishiMitra AI{% endblock %}
+
+{% block content %}
+<div style="max-width: 850px; margin: 0 auto;">
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; color: var(--primary-dark);">Tomato Leaf Disease Computer Vision</h1>
+    <p style="color: var(--text-muted); font-size: 1rem;">Upload a clear photograph of a tomato leaf for instant computer-vision screening and explainable feature heatmaps.</p>
+  </div>
+
+  {% if not model_configured %}
+    <div class="alert alert-warning">
+      <strong>⚠️ Model Not Configured:</strong> The tomato disease vision model checkpoint has not been trained yet.
+      <br>To configure, open your terminal and run: <code>python training/train_classifier.py</code>
+    </div>
+  {% endif %}
+
+  <div class="km-card" style="margin-bottom: 2rem;">
+    <form action="{{ url_for('crop.analyze') }}" method="POST" enctype="multipart/form-data" id="leaf-upload-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      
+      <div class="dropzone-box" onclick="document.getElementById('leaf_image_input').click();">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📸</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary-dark);">Drag and drop a leaf image here, or click to browse</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem;">Supported formats: PNG, JPG, JPEG, WEBP (Max size 16MB)</p>
+        
+        <input type="file" name="leaf_image" id="leaf_image_input" accept="image/*" style="display: none;" onchange="previewSelectedImage(event)" required>
+      </div>
+
+      <!-- Image Preview Area -->
+      <div id="image-preview-wrapper" style="display: none; margin-top: 1.5rem; text-align: center;">
+        <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Selected Leaf Photograph:</div>
+        <img id="image-preview" src="#" alt="Preview" style="max-width: 280px; max-height: 280px; border-radius: var(--radius-sm); border: 2px solid var(--border-color); object-fit: cover;">
+      </div>
+
+      <div style="margin-top: 1.75rem; display: flex; justify-content: center;">
+        <button type="submit" class="btn btn-primary" id="analyze-btn" style="padding: 0.75rem 2rem; font-size: 1rem;">
+          ⚡ Run Computer-Vision Diagnosis
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Guidelines & Supported Categories Card -->
+  <div class="km-card">
+    <div class="card-title">
+      <span>Supported Tomato Pathologies</span>
+      <span class="status-pill status-active">PlantVillage Dataset</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
+      <div style="padding: 0.75rem; background: #f0fdf4; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-leaf);">
+        <strong>🌿 Healthy Tomato Leaf</strong>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Uniform green coloration without fungal chlorosis or necrosis.</p>
+      </div>
+      <div style="padding: 0.75rem; background: #fffbeb; border-radius: var(--radius-sm); border-left: 3px solid #d97706;">
+        <strong>🍂 Early Blight (Alternaria solani)</strong>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Concentric ring target-spots and surrounding chlorotic yellow halos.</p>
+      </div>
+      <div style="padding: 0.75rem; background: #fef2f2; border-radius: var(--radius-sm); border-left: 3px solid #dc2626;">
+        <strong>🥀 Late Blight (Phytophthora infestans)</strong>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Rapidly spreading water-soaked dark lesions under humid conditions.</p>
+      </div>
+      <div style="padding: 0.75rem; background: #f8fafc; border-radius: var(--radius-sm); border-left: 3px solid #64748b;">
+        <strong>☁️ Leaf Mold (Passalora fulva)</strong>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Pale yellow upper spots with olive-brown velvety lower mold.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.25rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+      <strong>📌 Image Capture Tips:</strong> Place leaf against a neutral background with natural daylight. Avoid extreme shadows or heavy motion blur.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previewSelectedImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('image-preview').src = e.target.result;
+      document.getElementById('image-preview-wrapper').style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+  }
+}
+</script>
+{% endblock %}
